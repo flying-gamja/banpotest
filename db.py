@@ -90,8 +90,12 @@ def get_reagents(include_inactive=True):
     df = read_df("SELECT * FROM reagents" + ("" if include_inactive else " WHERE active=1") + " ORDER BY id")
     df["restricted"] = df["restricted"].astype(bool)
     df["active"] = df["active"].astype(bool)
-    df["expiry"] = pd.to_datetime(df["expiry"], errors="coerce").dt.date
-    df["expiry"] = df["expiry"].apply(lambda x: None if pd.isna(x) else x)
+    def _to_date(x):
+        try:
+            return dt.date.fromisoformat(x[:10]) if isinstance(x, str) and x else None
+        except ValueError:
+            return None
+    df["expiry"] = df["expiry"].apply(_to_date).astype(object)
     return df
 
 
