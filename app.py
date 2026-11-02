@@ -77,8 +77,8 @@ def page_reserve():
 
     # 시약 선택 (만료·교사전용 제외 표시)
     usable = reagents[~reagents["restricted"]].copy()
-    usable = usable[(pd.to_datetime(usable["expiry"], errors="coerce").isna())
-                    | (pd.to_datetime(usable["expiry"], errors="coerce").dt.date >= date)]
+    exp = usable["expiry"].fillna("").astype(str)  # 'YYYY-MM-DD' 문자열 비교
+    usable = usable[(exp == "") | (exp >= date.isoformat())]
     usable = usable[usable["available"] > 0]
     labels = {int(r["id"]): f"{r['name']} [{r['hazard_1']}] 가용 {r['available']:g}{r['unit']}"
               for _, r in usable.iterrows()}
